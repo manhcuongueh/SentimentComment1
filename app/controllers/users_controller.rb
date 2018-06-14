@@ -46,16 +46,16 @@ class UsersController < ApplicationController
         # Instantiates a client
         language = Google::Cloud::Language.new
         for i in 0..@post_dom.length-1   
-                links=Link.new(
-                    id: i ,
-                    link: @post_dom[i]
-                )
-                links.save
-                @@bot.navigate.to "#{@post_dom[i]}"
-                @start_time= Time.now
-                while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do 
-                    @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').click
-                    sleep 0.5
+            links=Link.new(
+                id: i ,
+                link: @post_dom[i]
+            )
+            links.save
+            @@bot.navigate.to "#{@post_dom[i]}"
+            @start_time= Time.now
+            while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do 
+                 @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').click
+                 sleep 0.5
                     if Time.now > @start_time + 120
                         sleep 3
                         if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled]').size > 0 && @k==0
@@ -82,40 +82,44 @@ class UsersController < ApplicationController
                             @start_time= Time.now
                         end
                     end
-
-
-                 end
-    
+                end
                 #find comments
                 dom_comment=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li')
                 dom_comment.shift
-                 
+                @text = "Google, headquartered in Mountain View."
+                @username = []
                 for d in dom_comment
-                    begin
-                        comment=d.find_element(:tag_name, 'span').text
-                        # Detects the sentiment of the text
-                        response = language.analyze_sentiment content: comment, type: :PLAIN_TEXT
-                        # Get document sentiment from response
-                        sentiment = response.document_sentiment
-                        @text_score = sentiment.score
-                        comments=Comment.new(
-                            id: i ,
-                            username:d.find_element(:tag_name, 'a')['title'],
-                            body:comment,
-                            score:@text_score
+                    comment=d.find_element(:tag_name, 'span').text
+                    comment=comment.gsub(/[!().~`,:;<>?|'"{}\\\/\[\]]/,' ')
+                    comment=comment.gsub("\n",' ')
+                    if comment.scan(/[a-zA-Z ]/).size==1
+                        comment.insert(0,"-")
+                    end
+                    comment.insert(-1,".")
+                    @text << "\n"
+                    @text << "\n"
+                    @text << comment
+                    @username.push(d.find_element(:tag_name, 'a')['title'])
+                end
+                # Detects the sentiment of the text
+                response = language.analyze_sentiment content: @text, type: :PLAIN_TEXT
+                # Get document sentiment from response
+                sentences = response.sentences
+                sentences.shift
+                @n=0
+                for e in 0..@username.length-1  
+                    if !sentences[e].text.content.include? "."
+                        @n=@n+1
+                    end
+                    comments=Comment.new(
+                        id: i ,
+                        username:@username[e],
+                        body:sentences[e+@n].text.content,
+                        score:sentences[e+@n].sentiment.score
                         )
                         comments.save
-                        rescue 
-                            comments=Comment.new(
-                                id: i ,
-                                username:d.find_element(:tag_name, 'a')['title'],
-                                body:comment,
-                                score:1000
-                            )
-                            comments.save
-                    end
+
                 end
-    
         end
             @@bot.quit()
             #get data from database
@@ -125,6 +129,6 @@ class UsersController < ApplicationController
     def show
         @id=params[:id]
         @comments=Comment.where('id = ?', @id)
-        @comments=@comments.sort_by {|comment| comment.score}
+        #@comments=@comments.sort_by {|comment| comment.score}
     end    
 end
