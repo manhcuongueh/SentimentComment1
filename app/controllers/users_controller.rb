@@ -2,9 +2,22 @@ class UsersController < ApplicationController
     def index    
         @links=Link.all
         @comment_count=[]
+        @score=[]
+        @min=[]
+        @max=[]
+        @average=[]
         for i in 0..@links.length-1
-            count=Comment.where('id = ?', i)
-            @comment_count.push(count.length)
+            @get_comments=Comment.where('id = ?', i)
+            
+            for cm in  @get_comments
+                @score.push(cm.score)
+            end
+            @min.push(@score.min)
+            @max.push(@score.max)
+            aver=@score.inject(0.0) { |sum, el| sum + el } / @score.length
+            @average.push(aver.round(3))
+            @score.clear
+            @comment_count.push(@get_comments.length)
         end
        
     end
@@ -30,7 +43,9 @@ class UsersController < ApplicationController
                 dom=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/article/div[1]/div/div/div')
                 for i in dom
                     if i.find_elements(:tag_name,'a').size>0
-                        dom=i.find_element(:tag_name,'a')['href']
+                        dom=[];
+                        dom[0]=i.find_element(:tag_name,'a')['href']
+                        dom[1]=i.find_element(:tag_name,'img')['src']
                         @post_dom.push(dom) 
                     end   
                 end      
@@ -46,12 +61,14 @@ class UsersController < ApplicationController
         # Instantiates a client
         language = Google::Cloud::Language.new
         for i in 0..@post_dom.length-1   
+            @@bot.navigate.to "#{@post_dom[i][0]}"
+            #save like and image
             links=Link.new(
                 id: i ,
-                link: @post_dom[i]
+                link: @post_dom[i][0],
+                image: @post_dom[i][1]
             )
             links.save
-            @@bot.navigate.to "#{@post_dom[i]}"
             @start_time= Time.now
             while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do 
                  @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').click
@@ -69,13 +86,13 @@ class UsersController < ApplicationController
                             @@bot.find_element(:id, 'id_password').send_keys '24081991'
                             @@bot.find_element(:class, 'button-green').click
                             sleep 0.5
-                            @@bot.navigate.to "#{@post_dom[i]}"  
+                            @@bot.navigate.to "#{@post_dom[i][0]}"  
                             @k=1
                             @start_time= Time.now
                         elsif @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled]').size > 0 && @k==1
                             @@bot.quit()
                             @@bot = Selenium::WebDriver.for :chrome 
-                            @@bot.navigate.to "#{@post_dom[i]}"
+                            @@bot.navigate.to "#{@post_dom[i][0]}"
                             sleep 0.5
                             @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/section/div/a').click
                             @k=0
@@ -129,14 +146,6 @@ class UsersController < ApplicationController
     def show
         @id=params[:id]
         @type=params[:type]
-        @get_comments=Comment.where('id = ?', @id)
-        @sort_comments=@get_comments.sort_by {|comment| comment.score}
-        if(@type=="low")
-            @comments=@sort_comments
-        elsif(@type=="high")
-            @comments=@sort_comments.reverse
-        else
-            @comments=@get_comments
-        end
+        @comments=Comment.where('id = ?', @id)
     end    
 end

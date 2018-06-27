@@ -8,19 +8,26 @@
       <table class="table">
         <thead>
           <th>No</th>
+          <th>Image</th>
           <th>Link</th>
           <th>Comments</th>
-          <th>View</th>
+          <th>Lowest</th>
+          <th>Highest</th>
+          <th>Average</th>
         </thead>
         <tbody>
          <% @links.each do |link|%>
           <tr>
             <td><%=link.id+1%></td>
+            <td><%=link_to image_tag(link.image, height: '100', width: '100'), link.image %></td>
             <td><%=link_to "#{link.link}", link.link%></td>
             <td><%= @comment_count[link.id]%></td>
-            <td><%= link_to "<button class='btn btn-link'>Normal</button>".html_safe , show_path(id: link.id, type: "normal") %>
-            <%= link_to "<button class='btn btn-link'>Lowest</button>".html_safe , show_path(id: link.id, type: "low") %>
-            <%= link_to "<button class='btn btn-link'>Highest</button>".html_safe , show_path(id: link.id, type: "high") %></td>    
+            <td><%= @min[link.id]%></td>
+            <td><%= @max[link.id]%></td>
+            <td><%= @average[link.id]%></td>
+            <td>
+            <%= link_to "<button class='btn btn-link'>Detail</button>".html_safe , show_path(id: link.id) %></td>  
+            </tr>  
         <%end%>
         </tbody>
       </table>
