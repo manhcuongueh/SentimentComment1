@@ -10,13 +10,17 @@
           <th>No</th>
           <th>Link</th>
           <th>Comments</th>
+          <th>View</th>
         </thead>
         <tbody>
          <% @links.each do |link|%>
           <tr>
             <td><%=link.id+1%></td>
             <td><%=link_to "#{link.link}", link.link%></td>
-            <td><%= link_to "#{@comment_count[link.id]}", show_path(id: link.id) %></td>   
+            <td><%= @comment_count[link.id]%></td>
+            <td><%= link_to "<button class='btn btn-link'>Normal</button>".html_safe , show_path(id: link.id, type: "normal") %>
+            <%= link_to "<button class='btn btn-link'>Lowest</button>".html_safe , show_path(id: link.id, type: "low") %>
+            <%= link_to "<button class='btn btn-link'>Highest</button>".html_safe , show_path(id: link.id, type: "high") %></td>    
         <%end%>
         </tbody>
       </table>

@@ -128,7 +128,15 @@ class UsersController < ApplicationController
     end
     def show
         @id=params[:id]
-        @comments=Comment.where('id = ?', @id)
-        #@comments=@comments.sort_by {|comment| comment.score}
+        @type=params[:type]
+        @get_comments=Comment.where('id = ?', @id)
+        @sort_comments=@get_comments.sort_by {|comment| comment.score}
+        if(@type=="low")
+            @comments=@sort_comments
+        elsif(@type=="high")
+            @comments=@sort_comments.reverse
+        else
+            @comments=@get_comments
+        end
     end    
 end
