@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
     def index    
         @links=Link.all
+        @all_comment=Comment.all
         @comment_count=[]
         @score=[]
         @min=[]
@@ -18,8 +19,8 @@ class UsersController < ApplicationController
             @average.push(aver.round(3))
             @score.clear
             @comment_count.push(@get_comments.length)
-        end
-       
+        end 
+        write_excel
     end
 
     def create
@@ -148,4 +149,27 @@ class UsersController < ApplicationController
         @type=params[:type]
         @comments=Comment.where('id = ?', @id)
     end    
+    def write_excel
+        workbook = RubyXL::Workbook.new
+            worksheet1=workbook[0]
+            worksheet1.sheet_name = "Link and Image"
+            worksheet2 = workbook.add_worksheet("All comments")
+                i=0
+                for link in @links
+                    worksheet1.add_cell(i, 0, link.id)
+                    worksheet1.add_cell(i, 1, link.image)
+                    worksheet1.add_cell(i, 2, link.link)
+                    i=i+1
+                end
+            worksheet2=workbook[1]
+                i=0
+                for comment in @all_comment
+                    worksheet2.add_cell(i, 0, comment.id)
+                    worksheet2.add_cell(i, 1, comment.username)
+                    worksheet2.add_cell(i, 2, comment.body)
+                    worksheet2.add_cell(i, 3, comment.score)
+                    i=i+1
+                end
+                workbook.write("data.xlsx")
+    end
 end
