@@ -7,8 +7,12 @@
           <td><h5> <%= @links.length%></h5><td>
         </tr>
         <tr>
-          <td><h5>Date</h5><td>
-          <td><h5>From <%=@links[-1].date%> to <%=@links[0].date%></h5><td>
+          <td><h5>From</h5><td>
+          <td><h5><%=@links[-1].date%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>To</h5><td>
+          <td><h5><%=@links[0].date%>></h5><td>
         </tr>
         <tr>
           <td><h5>Total of Comments:</h5><td>
