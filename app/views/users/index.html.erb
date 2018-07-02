@@ -1,9 +1,48 @@
-
-<div>
-  <div class="row">
-    <div class="col-lg-12 text-center">
-      <h1 class="title">Comments Statistics</h1>
+<div class="row">
+    <div class="col-lg-12">
+      <h1 class="title text-center">Comments Statistics</h1>
+      <table width="1000" align="center" class="text-left">
+        <tr>
+          <td><h5>Number of Port:</h5><td>
+          <td><h5> <%= @links.length%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Date</h5><td>
+          <td><h5>From <%=@links[-1].date%> to <%=@links[0].date%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Total of Comments:</h5><td>
+          <td><h5><%=@comment_count.sum%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Average Score:</h5><td>
+          <td><h5><%=@average_all%></h5><td>
+        </tr>
+         <tr>
+          <td><h5>Highest Score:</h5><td>
+          <td><h5><%=@max_all%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>URL:</h5><td>
+          <td><a href="<%=@max_all_url%>"><h5><%=@max_all_url%></h5></a><td>
+        </tr>
+         <tr>
+          <td><h5>Lowest Score:</h5><td>
+          <td><h5><%=@min_all%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>URL:</h5><td>
+          <td><a href="<%=@max_all_url%>"><h5><%=@min_all_url%></h5></a><td>
+        </tr>
+        <tr>
+          <td align="right"><%= button_to "Download Basic Information", index_write_path(type:"single"), class:  'btn btn-primary' %><td>
+          <td><%= button_to "Download All Comments", index_write_path(type:"all"), class:  'btn btn-primary' %><td>
+          <br></br>
+        </tr> 
+      </table>
     </div>
+    
+     
     <div class="col-lg-12 form-group">
       <table class="table">
         <thead>
@@ -25,9 +64,9 @@
             <td><%= @min[link.id]%></td>
             <td><%= @max[link.id]%></td>
             <td><%= @average[link.id]%></td>
-            <td>
-            <%= link_to "<button class='btn btn-link'>Detail</button>".html_safe , show_path(id: link.id) %></td>  
-            </tr>  
+            <td><%= link_to "<button class='btn btn-link'>Detail</button>".html_safe , show_path(id: link.id) %></td>  
+            <td><%= button_to "Download", index_single_path(id: link.id), class:  'btn btn-small'  %></td>
+          </tr>  
         <%end%>
         </tbody>
       </table>

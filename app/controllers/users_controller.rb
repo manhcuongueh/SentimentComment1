@@ -2,14 +2,18 @@ class UsersController < ApplicationController
     def index    
         @links=Link.all
         @all_comment=Comment.all
+        #array of the number of comment in a post
         @comment_count=[]
         @score=[]
+        #array of min(each post)
         @min=[]
+        #array of max(each post)
         @max=[]
+        #array of average(each post)
         @average=[]
+        #for loop to find max, min ...
         for i in 0..@links.length-1
             @get_comments=Comment.where('id = ?', i)
-            
             for cm in  @get_comments
                 @score.push(cm.score)
             end
@@ -20,10 +24,24 @@ class UsersController < ApplicationController
             @score.clear
             @comment_count.push(@get_comments.length)
         end 
-        write_excel
+        # min, max, average of all comment
+        #max
+        max_item=@all_comment.max_by{|k| k[:score] }
+        @max_all_url=Link.find_by_id(max_item.id)
+        @max_all_url=@max_all_url['link']
+        @max_all=max_item.score
+        #min
+        min_item=@all_comment.min_by{|k| k[:score] }
+        @min_all_url=Link.find_by_id(min_item.id)
+        @min_all_url=@min_all_url['link']
+        @min_all=min_item.score
+        #average
+        @average_all=@all_comment.inject(0.0) { |sum, el| sum + el.score } / @all_comment.length
+        @average_all=@average_all.round(3)
     end
 
     def create
+
         #declare dom of posts
         @post_dom=[]
         #Get Instagram Url
@@ -41,7 +59,7 @@ class UsersController < ApplicationController
             #save dom after 8 times press page down button
             if i%4==0
                 # elements contain the content of a post
-                dom=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/article/div[1]/div/div/div')
+                dom=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div/div/div/div')
                 for i in dom
                     if i.find_elements(:tag_name,'a').size>0
                         dom=[];
@@ -63,21 +81,24 @@ class UsersController < ApplicationController
         language = Google::Cloud::Language.new
         for i in 0..@post_dom.length-1   
             @@bot.navigate.to "#{@post_dom[i][0]}"
-            #save like and image
+            #save like, image and date
+            date = @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[2]/a/time')['title']
             links=Link.new(
                 id: i ,
                 link: @post_dom[i][0],
-                image: @post_dom[i][1]
+                image: @post_dom[i][1],
+                date: date
             )
             links.save
+            #set time to reload, change session
             @start_time= Time.now
             while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do 
                  @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').click
                  sleep 0.5
                     if Time.now > @start_time + 120
+                        # for solving "load more comments"
                         sleep 3
                         if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled]').size > 0 && @k==0
-                         
                             @@bot.quit()
                             @@bot = Selenium::WebDriver.for :chrome 
                             @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
@@ -104,6 +125,7 @@ class UsersController < ApplicationController
                 #find comments
                 dom_comment=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li')
                 dom_comment.shift
+                #for solving unsupported languages
                 @text = "Google, headquartered in Mountain View."
                 @username = []
                 for d in dom_comment
@@ -113,6 +135,7 @@ class UsersController < ApplicationController
                     if comment.scan(/[a-zA-Z ]/).size==1
                         comment.insert(0,"-")
                     end
+                    #for sure each comment is each sentence
                     comment.insert(-1,".")
                     @text << "\n"
                     @text << "\n"
@@ -141,8 +164,7 @@ class UsersController < ApplicationController
         end
             @@bot.quit()
             #get data from database
-            index
-            render 'index'
+            redirect_to index_path
     end
     def show
         @id=params[:id]
@@ -150,26 +172,82 @@ class UsersController < ApplicationController
         @comments=Comment.where('id = ?', @id)
     end    
     def write_excel
+        @links=Link.all
+        @all_comment=Comment.all
+        @type=params[:type]
+        #generate new Excel file
         workbook = RubyXL::Workbook.new
-            worksheet1=workbook[0]
-            worksheet1.sheet_name = "Link and Image"
-            worksheet2 = workbook.add_worksheet("All comments")
+        worksheet=workbook[0]
+        #save information for all post
+        if(@type=="single")
+            worksheet.add_cell(0, 0, "ID")
+            worksheet.add_cell(0, 1, "IMAGE")
+            worksheet.add_cell(0, 2, "URL")
+            worksheet.add_cell(0, 3, "LOWEST SCORE")
+            worksheet.add_cell(0, 4, "HIGHEST SCORE")
+            worksheet.add_cell(0, 5, "AVERAGE")
                 i=0
+                @score=[]
                 for link in @links
-                    worksheet1.add_cell(i, 0, link.id)
-                    worksheet1.add_cell(i, 1, link.image)
-                    worksheet1.add_cell(i, 2, link.link)
-                    i=i+1
+                    @get_comments=Comment.where('id = ?', i)
+                    for cm in  @get_comments
+                        @score.push(cm.score)
+                    end
+                    @average=@score.inject(0.0) { |sum, el| sum + el } / @score.length
+                    worksheet.add_cell(i+1, 0, link.id)
+                    worksheet.add_cell(i+1, 1, link.image)
+                    worksheet.add_cell(i+1, 2, link.link)
+                    worksheet.add_cell(i+1, 3, @score.min)
+                    worksheet.add_cell(i+1, 4, @score.max)
+                    worksheet.add_cell(i+1, 5, @average)  
+                    i=i+1   
                 end
-            worksheet2=workbook[1]
-                i=0
-                for comment in @all_comment
-                    worksheet2.add_cell(i, 0, comment.id)
-                    worksheet2.add_cell(i, 1, comment.username)
-                    worksheet2.add_cell(i, 2, comment.body)
-                    worksheet2.add_cell(i, 3, comment.score)
-                    i=i+1
-                end
-                workbook.write("data.xlsx")
+                name=@links.first
+                name=name['link']
+                name=name.split('=')[-1]
+                workbook.write("data/#{name}.xlsx")
+                flash[:success] = "You are create excel file (overall type) sucessfully"
+                redirect_to index_path
+        #save all comments to excel file
+        else
+            i=0
+            for comment in @all_comment
+                worksheet.add_cell(i, 0, comment.id)
+                worksheet.add_cell(i, 1, comment.username)
+                worksheet.add_cell(i, 2, comment.body)
+                worksheet.add_cell(i, 3, comment.score)
+                i=i+1
+            end
+            name=@links.first
+            name=name['link']
+            name=name.split('=')[-1]
+            workbook.write("data/#{name}-all-comments.xlsx")
+            flash[:success] = "You are create excel file (all comments) sucessfully"
+            redirect_to index_path
+        end
+                
+    end
+    #save information for each comment
+    def write_single
+        @id=params[:id]
+        workbook = RubyXL::Workbook.new
+        worksheet=workbook[0]
+        @get_comments=Comment.where('id = ?', @id)
+        i=0
+        for comment in  @get_comments
+            worksheet.add_cell(i, 0, comment.id)
+            worksheet.add_cell(i, 1, comment.username)
+            worksheet.add_cell(i, 2, comment.body)
+            worksheet.add_cell(i, 3, comment.score)
+            i=i+1
+        end
+        @links=Link.all
+        name=@links.first
+        name=name['link']
+        name=name.split('=')[-1]
+        post_number=@id.to_i+1
+        workbook.write("data/#{name}(post#{post_number}).xlsx")
+        flash[:success] = "You are create excel file (post#{post_number}) sucessfully"
+        redirect_to index_path
     end
 end

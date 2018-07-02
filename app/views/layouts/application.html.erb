@@ -10,6 +10,17 @@
   </head>
 
   <body>
+  <section class="content" style="min-height: auto;">
+      <% flash.each do |key, value| %>
+      <div align="center">
+        <div class="col-lg-4 text-center">
+          <div class="alert alert-<%= key %> ">
+            <%= value %>
+          </div>
+        </div>
+        </div>
+      <% end %>
+    </section>
     <%= yield %>
   </body>
 </html>
