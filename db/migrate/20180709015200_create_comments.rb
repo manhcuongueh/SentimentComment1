@@ -1,8 +1,8 @@
 class CreateComments < ActiveRecord::Migration[5.2]
   def change
-    create_table :comments,:id => false do |t|
-      t.integer :id
+    create_table :comments do |t|
       t.string :username
+      t.string :image
       t.text :body
       t.float :score
 
