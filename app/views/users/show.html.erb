@@ -27,9 +27,10 @@
         <% @comments.each do |cm|%>  
           <tr>
           <td><%=i%></td>
-            <td><%=cm.username%></td>
+            <td><b><%=cm.username%></b></td>
             <td><%=cm.body%></td>
             <td><%=cm.score%></td>
+            <td><%=cm.post_id%></td>
           </tr>
           <% i=i+1%>
         <%end%>

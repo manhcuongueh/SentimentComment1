@@ -1,0 +1,95 @@
+<style>
+.pagination {
+    margin: auto;
+    margin-bottom: 10px;
+    width: 40%;
+    border: 1px solid grey;
+    padding: 10px;
+}
+.pagination a {
+    padding: 8px 16px;
+}
+</style>
+<div class="row">
+    <div class="col-lg-12">
+      <h1 class="title text-center">Comments Statistics</h1>
+      <table width="1000" align="center" class="text-left">
+        <tr>
+          <td><h5>Username:</h5><td>
+          <td><h5> <%= @user.username%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Number of Port:</h5><td>
+          <td><h5> <%= @posts.length%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>From</h5><td>
+          <td><h5><%=@posts[-1].date%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>To</h5><td>
+          <td><h5><%=@posts[0].date%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Total of Comments:</h5><td>
+          <td><h5><%=@comment_count.sum%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>Average Score:</h5><td>
+          <td><h5><%=@average_all%></h5><td>
+        </tr>
+         <tr>
+          <td><h5>Highest Score:</h5><td>
+          <td><h5><%=@max_all%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>URL:</h5><td>
+          <td><a href="<%=@max_all_url%>"><h5><%=@max_all_url%></h5></a><td>
+        </tr>
+         <tr>
+          <td><h5>Lowest Score:</h5><td>
+          <td><h5><%=@min_all%></h5><td>
+        </tr>
+        <tr>
+          <td><h5>URL:</h5><td>
+          <td><a href="<%=@max_all_url%>"><h5><%=@min_all_url%></h5></a><td>
+        </tr>
+      </table>
+    </div>
+    
+    <table align="center">
+          <td><%= button_to "Download Basic Information", index_write_path(id: @id, type:"single"), class:  'btn btn-primary' %><td>
+          <td><%= button_to "Download All Comments", index_write_path(id: @id, type:"all"), class:  'btn btn-primary' %><td>
+          <td><%= button_to "Download All Comments By Rank", index_write_path(id: @id, type:"rank"), class:  'btn btn-primary' %><td>
+    </table>
+    <br></br>
+    <div class="col-lg-12 form-group">
+      <table class="table">
+        <thead>
+          <th>No</th>
+          <th>Username</th>
+          <th>Comments</th>
+          <th>Score</th>
+          <th>Link</th>
+          <th>Image</th>
+        </thead>
+        <tbody>
+        <% i=0%>  
+         <% @all_comments.each do |cm|%>
+          <tr>
+            <td><%=@all_links.index(cm)+1%></td>
+            <td><b><%=cm.username %></b></td>
+            <td><%=cm.body%></td>
+            <td><%=cm.score%></td>
+            <td><%=link_to "#{@posts.find_by_id(cm.post_id)['link']}", @posts.find_by_id(cm.post_id)['link']%></td>
+            <td><%=link_to image_tag(@posts.find_by_id(cm.post_id)['image'], height: '100', width: '100'), @posts.find_by_id(cm.post_id)['image'] %></td>
+          </tr>  
+        <%end%>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div>
+      <%= paginate @all_comments %>
+  </div>

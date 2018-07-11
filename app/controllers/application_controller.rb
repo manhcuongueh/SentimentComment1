@@ -4,12 +4,10 @@ class ApplicationController < ActionController::Base
     def set_page
       @id = params[:id]
       if @id.nil?
-        @link="index"
         @name=''
       else
-        @link="index?id=#{@id}"
-        user=User.find_by_id(@id)
-        @name=user.username
+        @link_index="index?id=#{@id}"
+        @link_comment="comments?id=#{@id}"
       end
 
     end

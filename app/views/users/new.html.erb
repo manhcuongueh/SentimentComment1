@@ -30,7 +30,7 @@
 
 <div class="container">
     <hr>
-    <table width="600">
+    <table width="800">
       <thead>
         <th>No</th>
         <th>Username</th>
@@ -42,10 +42,11 @@
           <% @users.each do |user|%>
             <tr>
               <td><%=i%></td>
-              <td><%=user.username%></td>
+              <td><b><%=user.username%></b></td>
               <td><%=user.posts[-1].date%></td>
               <td><%=user.posts[0].date%></td>
               <td><%= link_to "<button class='btn btn-info'>Detail</button>".html_safe , index_path(id: user.id) %></td>
+              <td><%= link_to "<button class='btn btn-info'>View all Comments</button>".html_safe , comments_path(id: user.id) %></td>
               <td style= "padding: 5px;"><%= button_to "Delete", root_path(id: user.id), data: {confirm: 'Are you sure to delete this account?'}, class:  'btn btn-danger'%></td>
             </tr>
             <% i=i+1%>
