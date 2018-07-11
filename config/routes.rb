@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   root 'users#new'
+  post '' => 'users#delete'
   get  'index' => 'users#index'
   post 'index' => 'users#create'
   post 'index/write' => 'users#write_excel'

@@ -1,3 +1,15 @@
+<style>
+.pagination {
+    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-left: 50px;
+    width: 40%;
+    padding: 10px;
+}
+.pagination a {
+    padding: 8px 16px;
+}
+</style>
 <div class="container text-center">
     <div>
       <h2 class="title">Enter a Instagram Username</h2>
@@ -33,13 +45,14 @@
               <td><%=user.username%></td>
               <td><%=user.posts[-1].date%></td>
               <td><%=user.posts[0].date%></td>
-              
-              <td>
-              <%= link_to "<button class='btn btn-link'>Detail</button>".html_safe , index_path(id: user.id) %>
-              </td>
+              <td><%= link_to "<button class='btn btn-info'>Detail</button>".html_safe , index_path(id: user.id) %></td>
+              <td style= "padding: 5px;"><%= button_to "Delete", root_path(id: user.id), data: {confirm: 'Are you sure to delete this account?'}, class:  'btn btn-danger'%></td>
             </tr>
             <% i=i+1%>
               <%end%>
       </tbody>
     </table>
+    <div>
+      <%= paginate @users %>
+  </div>
 </div>

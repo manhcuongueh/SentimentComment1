@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
     def new
-        @users = User.all
+        @users = User.all.page(params[:page]).per(10)
     end
 
     def index    
@@ -31,23 +31,35 @@ class UsersController < ApplicationController
             @comment_count.push(@get_comments.length)
         end 
         # min, max, average of all comment
-        #max
-        max_item=@all_links.max_by{|k| k[:score] }
-        @max_all_url=@posts.find_by_id(max_item.post_id)
-        @max_all_url=@max_all_url['link']
-        @max_all=max_item.score
-        #min
-        min_item=@all_links.min_by{|k| k[:score] }
-        @min_all_url=@posts.find_by_id(min_item.post_id)
-        @min_all_url=@min_all_url['link']
-        @min_all=min_item.score
-        #average
-        @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
-        @average_all=@average_all.round(3)
+        if @all_links.size != 0
+            #max
+            max_item=@all_links.max_by{|k| k[:score] }
+            @max_all_url=@posts.find_by_id(max_item.post_id)
+            @max_all_url=@max_all_url['link']
+            @max_all=max_item.score
+            #min
+            min_item=@all_links.min_by{|k| k[:score] }
+            @min_all_url=@posts.find_by_id(min_item.post_id)
+            @min_all_url=@min_all_url['link']
+            @min_all=min_item.score
+            #average
+            @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
+            @average_all=@average_all.round(3)
+        else
+            #max
+            @max_all_url=''
+            @max_all=0
+            #min
+            @min_all_url=''
+            @min_all=0
+            #average
+            @average_all=0
+        end
+
     end
 
     def create
-
+        flash.clear
         #declare dom of posts
         @post_dom=[]
         #Get Instagram Url
@@ -168,7 +180,7 @@ class UsersController < ApplicationController
                     end
             end
                 @@bot.quit()
-                redirect_to index_path
+                redirect_to index_path(id: @users.id)
         else
             flash[:warning] = "Please enter the valid username!"
             @@bot.quit()
@@ -185,9 +197,11 @@ class UsersController < ApplicationController
        #find user 
        @user=User.find_by_id(@id)
        @posts= @user.posts 
-       @comments=@posts.find_by_id(@post_id).comments
+       @all_comments=@posts.find_by_id(@post_id).comments
+       @comments=@all_comments.page(params[:page]).per(50)
        if @type=="rank"
-           @comments= @comments.sort_by{|k| k[:score] }
+           sort_comments= @all_comments.sort_by{|k| k[:score] }
+           @comments=Kaminari.paginate_array(sort_comments).page(params[:page]).per(50)
        end
     end    
     def write_excel
@@ -342,4 +356,11 @@ class UsersController < ApplicationController
             redirect_to index_path(id: @id)
         end
     end
+    def delete
+        @id=params[:id]
+        @user = User.find_by_id(@id)
+        @user.destroy
+        redirect_to root_path
+    end
+
 end
