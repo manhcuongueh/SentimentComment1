@@ -194,15 +194,16 @@ def create
             )
             #set time to reload, change session
             @start_time= Time.now
-            while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do 
-                @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').click
+            while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do
+                @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a').click
                 sleep 0.5
-                    if Time.now > @start_time + 120
-                        # for solving "load more comments"
-                        sleep 3
-                        if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled]').size > 0 && @k==0
+                if (Time.now > @start_time + 60)
+                    sleep 3 
+                    if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled=""]').size > 0                    
+                        if @k==0 
                             @@bot.quit()
                             @@bot = Selenium::WebDriver.for :chrome 
+                            @@bot.manage.window.maximize
                             @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
                             sleep 0.5
                             #using username and password to login
@@ -210,20 +211,24 @@ def create
                             @@bot.find_element(:id, 'id_password').send_keys '24081991'
                             @@bot.find_element(:class, 'button-green').click
                             sleep 0.5
-                            @@bot.navigate.to "#{@post_dom[i][0]}"  
+                            @@bot.navigate.to "#{@post_dom[i]}"  
                             @k=1
                             @start_time= Time.now
-                        elsif @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled]').size > 0 && @k==1
+                        else  
                             @@bot.quit()
                             @@bot = Selenium::WebDriver.for :chrome 
-                            @@bot.navigate.to "#{@post_dom[i][0]}"
+                            @@bot.manage.window.maximize
+                            @@bot.navigate.to "#{@post_dom[i]}"
                             sleep 0.5
                             @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/section/div/a').click
                             @k=0
                             @start_time= Time.now
                         end
+                    else
+                        @start_time= Time.now
                     end
                 end
+             end
                 #find comments
                 dom_comment=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li')
                 dom_comment.shift

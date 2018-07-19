@@ -11,12 +11,13 @@
 #
 default: &default
   adapter: mysql2
+  port: 3306
   pool: 5
-  username: root
-  password: Manhcuong91
-  socket: /var/run/mysqld/mysqld.sock
+  username: parastar
+  password: Parastar2018
+  reconnect: false
   encoding: utf8mb4
-  collation: utf8mb4_unicode_ci
+  host: 104.198.87.188
 
 development:
   <<: *default
