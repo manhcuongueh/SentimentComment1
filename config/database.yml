@@ -11,13 +11,13 @@
 #
 default: &default
   adapter: mysql2
-  port: 3306
+  port: 3307
+  host: 35.200.40.25
   pool: 5
   username: parastar
-  password: Parastar2018
+  password: Parastar2018!
   reconnect: false
   encoding: utf8mb4
-  host: 104.198.87.188
 
 development:
   <<: *default
