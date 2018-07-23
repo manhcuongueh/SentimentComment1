@@ -329,7 +329,12 @@ end
                 name=name.split('=')[-1]
                 workbook.write("data/#{name}.xlsx")
                 flash[:success] = "You are create excel file (overall type) sucessfully"
-                redirect_to index_path(id: @id)
+                send_file(
+                    "#{Rails.root}/data/#{name}.xlsx",
+                    filename: "#{name}.xlsx",
+                    type: "application/xlsx"
+                  )
+                #redirect_to index_path(id: @id)
         #save all comments to excel file
         elsif(@type=="all")
             worksheet.add_cell(0, 0, "ID")
@@ -349,7 +354,12 @@ end
             name=name.split('=')[-1]
             workbook.write("data/#{name}-all-comments.xlsx")
             flash[:success] = "You are create excel file (all comments) sucessfully"
-            redirect_to index_path(id: @id)
+            send_file(
+                "#{Rails.root}/data/#{name}-all-comments.xlsx",
+                filename: "#{name}-all-comments.xlsx",
+                type: "application/xlsx"
+              )
+            #redirect_to index_path(id: @id)
         else
             worksheet.add_cell(0, 0, "ID")
             worksheet.add_cell(0, 1, "USERNAME")
@@ -370,8 +380,12 @@ end
             name=name.split('=')[-1]
             workbook.write("data/#{name}-all-comments-by-rank.xlsx")
             flash[:success] = "You are create excel file (all comments by rank) sucessfully"
-            redirect_to index_path(id: @id)
-
+            send_file(
+                "#{Rails.root}/data/#{name}-all-comments-by-rank.xlsx",
+                filename: "#{name}-all-comments-by-rank.xlsx",
+                type: "application/xlsx"
+              )
+            #redirect_to index_path(id: @id)
         end
                 
     end
@@ -409,7 +423,12 @@ end
             post_number=(@post_id.to_i - post_no.to_i)+1
             workbook.write("data/#{name}(post#{post_number})-normal.xlsx")
             flash[:success] = "You are create excel file (post#{post_number}) by normal sucessfully"
-            redirect_to index_path(id: @id)
+            send_file(
+                "#{Rails.root}/data/#{name}(post#{post_number})-normal.xlsx",
+                filename: "#{name}(post#{post_number})-normal.xlsx",
+                type: "application/xlsx"
+              )
+            #redirect_to index_path(id: @id)
         else
             comments_sort= @get_comments.sort_by{|k| k[:score] }
             i=1
@@ -429,8 +448,12 @@ end
             post_number=(@post_id.to_i - post_no.to_i)+1
             workbook.write("data/#{name}(post#{post_number})-rank.xlsx")
             flash[:success] = "You are create excel file (post#{post_number}) by rank sucessfully"
-            redirect_to index_path(id: @id)
+            send_file(
+                "#{Rails.root}/data/#{name}(post#{post_number})-rank.xlsx",
+                filename: "#{name}(post#{post_number})-rank.xlsx",
+                type: "application/xlsx"
+              )
+            #redirect_to index_path(id: @id)
         end
     end
-
 end
