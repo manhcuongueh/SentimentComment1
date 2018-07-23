@@ -22,7 +22,7 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 gem 'rubyXL'
 gem 'nokogiri'
-gem "mysql2", "~> 0.4.4"
+gem "sqlite3"
 gem 'selenium-webdriver'
 gem 'geckodriver-helper'
 gem 'google-cloud-language'
