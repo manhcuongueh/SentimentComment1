@@ -149,7 +149,11 @@ def create
     #remove data of existing account 
     User.find_each { |c| c.destroy if c.username==@insta_url}
     #run chrome
-    @@bot = Selenium::WebDriver.for :chrome 
+    options = Selenium::WebDriver::Chrome::Options.new
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    @@bot = Selenium::WebDriver.for :chrome, options: options
+ 
     sleep 1
     @@bot.navigate.to "https://www.instagram.com/#{@insta_url}"
     sleep 1  
