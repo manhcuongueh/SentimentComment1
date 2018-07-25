@@ -58,9 +58,9 @@
     </div>
     
     <table align="center">
-          <td><%= button_to "Download Basic Information", index_write_path(id: @id, type:"single"), class:  'btn btn-primary' %><td>
-          <td><%= button_to "Download All Comments", index_write_path(id: @id, type:"all"), class:  'btn btn-primary' %><td>
-          <td><%= button_to "Download All Comments By Rank", index_write_path(id: @id, type:"rank"), class:  'btn btn-primary' %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download Basic Information</button>".html_safe, index_write_path(id: @id, type:"single") %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download All Comments</button>".html_safe, index_write_path(id: @id, type:"all")  %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download All Comments By Rank</button>".html_safe, index_write_path(id: @id, type:"rank") %><td>
     </table>
     <br></br>
     <div class="col-lg-12 form-group">
