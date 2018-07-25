@@ -328,7 +328,6 @@ end
                 name=name['link']
                 name=name.split('=')[-1]
                 workbook.write("data/#{name}.xlsx")
-                flash[:success] = "You are create excel file (overall type) sucessfully"
                 send_file(
                     "#{Rails.root}/data/#{name}.xlsx",
                     filename: "#{name}.xlsx",
@@ -353,7 +352,6 @@ end
             name=name['link']
             name=name.split('=')[-1]
             workbook.write("data/#{name}-all-comments.xlsx")
-            flash[:success] = "You are create excel file (all comments) sucessfully"
             send_file(
                 "#{Rails.root}/data/#{name}-all-comments.xlsx",
                 filename: "#{name}-all-comments.xlsx",
@@ -379,7 +377,6 @@ end
             name=name['link']
             name=name.split('=')[-1]
             workbook.write("data/#{name}-all-comments-by-rank.xlsx")
-            flash[:success] = "You are create excel file (all comments by rank) sucessfully"
             send_file(
                 "#{Rails.root}/data/#{name}-all-comments-by-rank.xlsx",
                 filename: "#{name}-all-comments-by-rank.xlsx",
@@ -422,7 +419,6 @@ end
             #get 
             post_number=(@post_id.to_i - post_no.to_i)+1
             workbook.write("data/#{name}(post#{post_number})-normal.xlsx")
-            flash[:success] = "You are create excel file (post#{post_number}) by normal sucessfully"
             send_file(
                 "#{Rails.root}/data/#{name}(post#{post_number})-normal.xlsx",
                 filename: "#{name}(post#{post_number})-normal.xlsx",
@@ -447,7 +443,6 @@ end
             #get 
             post_number=(@post_id.to_i - post_no.to_i)+1
             workbook.write("data/#{name}(post#{post_number})-rank.xlsx")
-            flash[:success] = "You are create excel file (post#{post_number}) by rank sucessfully"
             send_file(
                 "#{Rails.root}/data/#{name}(post#{post_number})-rank.xlsx",
                 filename: "#{name}(post#{post_number})-rank.xlsx",
