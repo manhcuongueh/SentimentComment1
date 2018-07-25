@@ -47,9 +47,9 @@
     </div>
     
     <table align="center">
-          <td><%= button_to "Download Basic Information", index_write_path(id: @id, type:"single"), class:  'btn btn-primary' %><td>
-          <td><%= button_to "Download All Comments", index_write_path(id: @id, type:"all"), class:  'btn btn-primary' %><td>
-          <td><%= button_to "Download All Comments By Rank", index_write_path(id: @id, type:"rank"), class:  'btn btn-primary' %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download Basic Information</button>".html_safe, index_write_path(id: @id, type:"single") %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download All Comments</button>".html_safe, index_write_path(id: @id, type:"all")  %><td>
+          <td><%= link_to "<button class='btn btn-primary'>Download All Comments By Rank</button>".html_safe, index_write_path(id: @id, type:"rank") %><td>
     </table>
     <br></br>
     <div class="col-lg-12 form-group">
@@ -76,11 +76,11 @@
             <td><%= @average[i]%></td>
             <td align = "center">
             <%= link_to "<button class='btn btn-link'>View as normal</button>".html_safe , show_path(id: @id, post_id: post.id,type: "normal") %>
-            <%= button_to "Download", index_single_path(id: @id, post_id: post.id, type:"normal"), class:  'btn btn-small'  %>
+            <%= link_to "<button class='btn btn-small'>Download</button>".html_safe, index_single_path(id: @id, post_id: post.id, type:"normal")%>
             </td> 
             <td>
             <%= link_to "<button class='btn btn-link'>View as rank</button>".html_safe , show_path(id: @id, post_id: post.id,type: "rank") %>   
-            <%= button_to "Download", index_single_path(id: @id, post_id: post.id,type: "rank"), class:  'btn btn-small'  %>
+            <%= link_to "<button class='btn btn-small'>Download</button>".html_safe, index_single_path(id: @id, post_id: post.id,type: "rank") %>
             </td>
             <%i=i+1%>
           </tr>  
