@@ -17,10 +17,11 @@
     <div>
         <%= form_tag :action => "index" do %>
           <div class="form-group" >
-            <%= text_field_tag :insta_url, nil, class: "col-lg-4" %>
-           
+            <%= text_field_tag :insta_url, nil, placeholder: 'Hint: hyejung_belle, katiejonesknit...', class: "col-lg-4" %>
           </div>
-           <p>(Hint: hyejung_belle, katiejonesknit)</p>
+           <div class="form-group" >
+            <%= password_field_tag :pass, nil, placeholder: 'Enter secret code...', class: "col-lg-2" %>
+          </div>
           <div class="text-center">
             <%= submit_tag "Submit", class: "btn btn-info" %>
           </div>
