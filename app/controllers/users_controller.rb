@@ -1,6 +1,15 @@
 class UsersController < ApplicationController
     def new
-        @users = User.all.page(params[:page]).per(10)
+        @users_all = User.all
+        @users_all=@users_all.reverse
+        #search
+        username = params[:username]
+        if !username.nil?
+        @users_all = @users_all.find_all{|w| w.username.include?(username)}
+        end
+        # paging area
+        @users=Kaminari.paginate_array(@users_all).page(params[:page]).per(10)
+        
     end
 
     def index    
@@ -122,10 +131,10 @@ class UsersController < ApplicationController
        @user=User.find_by_id(@id)
        @posts= @user.posts 
        @all_comments=@posts.find_by_id(@post_id).comments
-       @comments=@all_comments.page(params[:page]).per(50)
+       @comments=Kaminari.paginate_array(@all_comments).page(params[:page]).per(50)
        if @type=="rank"
-           sort_comments= @all_comments.sort_by{|k| k[:score] }
-           @comments=Kaminari.paginate_array(sort_comments).page(params[:page]).per(50)
+           @all_comments= @all_comments.sort_by{|k| k[:score] }
+           @comments=Kaminari.paginate_array(@all_comments).page(params[:page]).per(50)
        end
     end    
     
@@ -143,26 +152,28 @@ class UsersController < ApplicationController
 def create
     flash.clear
     #declare dom of posts
-    @post_dom=[]
+    post_dom=[]
     #Get Instagram Url
-    @insta_url=params[:insta_url]
+    insta_url=params[:insta_url]
     #Get pass
-    @pass=params[:pass]
+    pass=params[:pass]
     #remove data of existing account 
-    if @pass=="parastar"
-        User.find_each { |c| c.destroy if c.username==@insta_url}
+    if pass=="parastar"
         #run chrome
         options = Selenium::WebDriver::Chrome::Options.new
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         @@bot = Selenium::WebDriver.for :chrome, options: options
-    
+        #@@bot = Selenium::WebDriver.for :chrome
+        @@bot.manage.window.maximize
         sleep 1
-        @@bot.navigate.to "https://www.instagram.com/#{@insta_url}"
+        @@bot.navigate.to "https://www.instagram.com/#{insta_url}"
         sleep 1  
         if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div/div/div/div').size >0 
+            #get account_id
+            user_id = @@bot.find_element(:xpath, '/html/body/span/section/main/div/header/section/div[1]/h1').text
             #Save Instagram account
-            @users=User.create(username:  @insta_url)         
+            @users=User.new(username:  user_id)         
             #close login requirement 
             @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/a').click
             
@@ -179,61 +190,74 @@ def create
                             dom=[];
                             dom[0]=i.find_element(:tag_name,'a')['href']
                             dom[1]=i.find_element(:tag_name,'img')['src']
-                            @post_dom.push(dom) 
+                            post_dom.push(dom) 
                         end   
                     end      
                 end 
             end
             #avoid duplicate when save dom
-            @post_dom=@post_dom.uniq
+            post_dom=post_dom.uniq
             #Get exactly 100 post
-            @post_dom=@post_dom[0..99]
-            @k=0
+            post_dom=post_dom[0..99]
+            k=0
             # Instantiates a client
             language = Google::Cloud::Language.new
-            for i in 0..@post_dom.length-1   
-                @@bot.navigate.to "#{@post_dom[i][0]}"
+            for i in 0..post_dom.length-1   
+                @@bot.navigate.to "#{post_dom[i][0]}"
                 #save like, image and date
                 date = @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[2]/a/time')['title']
-                @post=@users.posts.create(
-                    link: @post_dom[i][0],
-                    image: @post_dom[i][1],
+                @post=@users.posts.new(
+                    link: post_dom[i][0],
+                    image: post_dom[i][1],
                     date: date
                 )
                 #set time to reload, change session
-                @start_time= Time.now
-                while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@role="button"]').size > 0 do
-                    @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a').click
-                    sleep 0.5
-                    if (Time.now > @start_time + 60)
+                start_time= Time.now
+                while @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/button').size > 0 do
+                    if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/button[@disabled=""]').size > 0
+                        sleep 3
+                    else
+                        @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/button').click
+                        sleep 0.5
+                    end
+                    if (Time.now > start_time + 60)
                         sleep 3 
-                        if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/a[@disabled=""]').size > 0                    
-                            if @k==0 
+                        if @@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li[2]/button[@disabled=""]').size > 0                    
+                            if k==0 
                                 @@bot.quit()
-                                @@bot = Selenium::WebDriver.for :chrome 
+                                options = Selenium::WebDriver::Chrome::Options.new
+                                options.add_argument('--headless')
+                                options.add_argument('--no-sandbox')
+                                @@bot = Selenium::WebDriver.for :chrome, options: options
+                                #@@bot = Selenium::WebDriver.for :chrome
                                 @@bot.manage.window.maximize
                                 @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
                                 sleep 0.5
                                 #using username and password to login
-                                @@bot.find_element(:id, 'id_username').send_keys 'cuong_manh248'
-                                @@bot.find_element(:id, 'id_password').send_keys '24081991'
+                                @@bot.find_element(:id, 'id_username').send_keys 'minhho402'
+                                @@bot.find_element(:id, 'id_password').send_keys '515173'
                                 @@bot.find_element(:class, 'button-green').click
                                 sleep 0.5
-                                @@bot.navigate.to "#{@post_dom[i]}"  
-                                @k=1
-                                @start_time= Time.now
+                                @@bot.navigate.to "#{post_dom[i][0]}"  
+                                k=1
+                                start_time= Time.now
                             else  
                                 @@bot.quit()
-                                @@bot = Selenium::WebDriver.for :chrome 
+                                options = Selenium::WebDriver::Chrome::Options.new
+                                options.add_argument('--headless')
+                                options.add_argument('--no-sandbox')
+                                @@bot = Selenium::WebDriver.for :chrome, options: options
+                                #@@bot = Selenium::WebDriver.for :chrome
                                 @@bot.manage.window.maximize
-                                @@bot.navigate.to "#{@post_dom[i]}"
+                                @@bot.manage.window.maximize
+                                @@bot.navigate.to "#{post_dom[i][0]}"
                                 sleep 0.5
                                 @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/a').click
-                                @k=0
-                                @start_time= Time.now
+                                k=0
+                                start_time= Time.now
                             end
                         else
-                            @start_time= Time.now
+                            start_time= Time.now
                         end
                     end
                 end
@@ -241,7 +265,7 @@ def create
                     dom_comment=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li')
                     dom_comment.shift
                     #for solving unsupported languages
-                    @text = "Google, headquartered in Mountain View."
+                    text = "Google, headquartered in Mountain View."
                     @username = []
                     for d in dom_comment
                         comment=d.find_element(:tag_name, 'span').text
@@ -252,28 +276,31 @@ def create
                         end
                         #for sure each comment is each sentence
                         comment.insert(-1,".")
-                        @text << "\n"
-                        @text << "\n"
-                        @text << comment
+                        text << "\n"
+                        text << "\n"
+                        text << comment
                         @username.push(d.find_element(:tag_name, 'a')['title'])
                     end
                     # Detects the sentiment of the text
-                    response = language.analyze_sentiment content: @text, type: :PLAIN_TEXT
+                    response = language.analyze_sentiment content: text, type: :PLAIN_TEXT
                     # Get document sentiment from response
                     sentences = response.sentences
                     sentences.shift
-                    @n=0
+                    #check is it a sentence 
+                    n=0
                     for e in 0..@username.length-1  
                         if !sentences[e].text.content.include? "."
-                            @n=@n+1
+                            n=n+1
                         end
-                        users_comments=@post.comments.create(
+                        users_comments=@post.comments.new(
                             username:@username[e],
-                            body:sentences[e+@n].text.content,
-                            score:sentences[e+@n].sentiment.score
+                            body:sentences[e+n].text.content,
+                            score:sentences[e+n].sentiment.score
                             )
                     end
             end
+                User.find_each { |c| c.destroy if c.username==user_id}
+                @users.save
                 @@bot.quit()
                 redirect_to index_path(id: @users.id)
         else

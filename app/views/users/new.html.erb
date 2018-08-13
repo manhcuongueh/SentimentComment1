@@ -30,6 +30,16 @@
 </div>
 
 <div class="container">
+    <%= form_tag('/', :method => :get) do %>
+      <table>
+          <td style ="padding-right:15px;"> 
+            <%= text_field_tag :username, params[:username], placeholder: 'Enter an ID', class: "col-lg-12" %>
+          </td>
+          <td>
+            <%= submit_tag "Search", class: "btn btn-info"%>
+          </td>
+           <% end %>
+      </table>
     <hr>
     <table width="800">
       <thead>
@@ -39,10 +49,9 @@
         <th>Date End</th>
       </thead>
       <tbody>
-        <% i=1%>
           <% @users.each do |user|%>
             <tr>
-              <td><%=i%></td>
+              <td><%=@users.index(user)+1%></td>
               <td><b><%=user.username%></b></td>
               <td><%=user.posts[-1].date%></td>
               <td><%=user.posts[0].date%></td>
@@ -50,7 +59,6 @@
               <td><%= link_to "<button class='btn btn-info'>View all Comments</button>".html_safe , comments_path(id: user.id) %></td>
               <td style= "padding: 5px;"><%= button_to "Delete", root_path(id: user.id), data: {confirm: 'Are you sure to delete this account?'}, class:  'btn btn-danger'%></td>
             </tr>
-            <% i=i+1%>
               <%end%>
       </tbody>
     </table>

@@ -22,11 +22,11 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.5'
 gem 'rubyXL'
 gem 'nokogiri'
-gem "sqlite3"
 gem 'selenium-webdriver'
 gem 'geckodriver-helper'
 gem 'google-cloud-language'
-gem 'kaminari'    
+gem 'kaminari'   
+gem "mysql2", "~> 0.4.4" 
 
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
