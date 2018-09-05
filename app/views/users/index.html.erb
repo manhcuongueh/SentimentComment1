@@ -70,10 +70,10 @@
             <td><%=i+1%></td>
             <td><%=link_to image_tag(post.image, height: '100', width: '100'), post.image %></td>
             <td><%=link_to "#{post.link}", post.link%></td>
-            <td><%= @comment_count[i]%></td>
-            <td><%= @min[i]%></td>
-            <td><%= @max[i]%></td>
-            <td><%= @average[i]%></td>
+            <td><%= post.totalComments%></td>
+            <td><%= post.minScore%></td>
+            <td><%= post.maxScore%></td>
+            <td><%= post.averageScore%></td>
             <td align = "center">
             <%= link_to "<button class='btn btn-link'>View as normal</button>".html_safe , show_path(id: @id, post_id: post.id,type: "normal") %>
             <%= link_to "<button class='btn btn-small'>Download</button>".html_safe, index_single_path(id: @id, post_id: post.id, type:"normal")%>

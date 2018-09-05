@@ -26,6 +26,7 @@
             <%= submit_tag "Submit", class: "btn btn-info" %>
           </div>
           <% end %>
+          
     </div>
 </div>
 
@@ -45,6 +46,7 @@
       <thead>
         <th>No</th>
         <th>Username</th>
+        <th>Average Score</th>
         <th>Date Start</th>
         <th>Date End</th>
       </thead>
@@ -53,6 +55,7 @@
             <tr>
               <td><%=@users.index(user)+1%></td>
               <td><b><%=user.username%></b></td>
+              <td><%=%></td>
               <td><%=user.posts[-1].date%></td>
               <td><%=user.posts[0].date%></td>
               <td><%= link_to "<button class='btn btn-info'>Detail</button>".html_safe , index_path(id: user.id) %></td>

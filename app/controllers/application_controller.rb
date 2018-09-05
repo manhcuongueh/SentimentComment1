@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
         @name=''
       else
         @link_index="index?id=#{@id}"
+        @link_index_sort_highest = "index?id=#{@id}&type=highest"
+        @link_index_sort_lowest = "index?id=#{@id}&type=lowest"
         @link_comment="comments?id=#{@id}"
       end
 

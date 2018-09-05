@@ -14,6 +14,7 @@ class UsersController < ApplicationController
 
     def index    
         @id=params[:id]
+        sort_type = params[:type]
         @user = User.find_by_id(@id)
         @posts= @user.posts     
         #array of the number of comment in a post
@@ -33,10 +34,20 @@ class UsersController < ApplicationController
                 score.push(cm.score)
                 @all_links.push(cm)
             end
-            @min.push(score.min)
-            @max.push(score.max)
             aver=score.inject(0.0) { |sum, el| sum + el } / score.length
-            @average.push(aver.round(3))
+            #get number of comments each post
+            i.totalComments = @get_comments.length
+            #set value if there have no comment
+            if i.totalComments == 0
+                i.minScore =0
+                i.maxScore = 0
+                i.averageScore = 0
+            else
+                i.minScore =score.min
+                i.maxScore = score.max
+                i.averageScore = aver.round(3)
+            end
+            i.save
             @comment_count.push(@get_comments.length)
         end 
         # min, max, average of all comment
@@ -46,14 +57,18 @@ class UsersController < ApplicationController
             @max_all_url=@posts.find_by_id(max_item.post_id)
             @max_all_url=@max_all_url['link']
             @max_all=max_item.score
+            @user.highestScore = @max_all
             #min
             min_item=@all_links.min_by{|k| k[:score] }
             @min_all_url=@posts.find_by_id(min_item.post_id)
             @min_all_url=@min_all_url['link']
             @min_all=min_item.score
+            @user.lowestScore = @min_all
             #average
             @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
             @average_all=@average_all.round(3)
+            @user.averageScore = @average_all
+            @user.totalComment = @comment_count.sum
         else
             #max
             @max_all_url=''
@@ -64,7 +79,13 @@ class UsersController < ApplicationController
             #average
             @average_all=0
         end
-
+        if (sort_type=="highest")
+            @posts =  @posts.sort_by {|p| p.average_score*-1}
+        end
+        if (sort_type=="lowest")
+            @posts =  @posts.sort_by {|p| p.average_score}
+        end
+        @user.save
     end
     def all_comments
         @id=params[:id]
@@ -151,6 +172,8 @@ class UsersController < ApplicationController
 =end
 def create
     flash.clear
+    # kill other chrome process
+    system("killall chrome")
     #declare dom of posts
     post_dom=[]
     #Get Instagram Url
@@ -234,8 +257,8 @@ def create
                                 @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
                                 sleep 0.5
                                 #using username and password to login
-                                @@bot.find_element(:id, 'id_username').send_keys 'minhho402'
-                                @@bot.find_element(:id, 'id_password').send_keys '515173'
+                                @@bot.find_element(:id, 'id_username').send_keys 'cuong_manh248'
+                                @@bot.find_element(:id, 'id_password').send_keys '24081991'
                                 @@bot.find_element(:class, 'button-green').click
                                 sleep 0.5
                                 @@bot.navigate.to "#{post_dom[i][0]}"  
@@ -300,6 +323,7 @@ def create
                     end
             end
                 User.find_each { |c| c.destroy if c.username==user_id}
+                
                 @users.save
                 @@bot.quit()
                 redirect_to index_path(id: @users.id)
