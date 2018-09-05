@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
     def new
         @users_all = User.all
-        @users_all=@users_all.reverse
+        @users_all=@users_all.sort_by {|u| u.averageScore*-1}
         #search
         username = params[:username]
         if !username.nil?
@@ -57,12 +57,14 @@ class UsersController < ApplicationController
             @max_all_url=@posts.find_by_id(max_item.post_id)
             @max_all_url=@max_all_url['link']
             @max_all=max_item.score
+            @user.highestUrl = @max_all_url
             @user.highestScore = @max_all
             #min
             min_item=@all_links.min_by{|k| k[:score] }
             @min_all_url=@posts.find_by_id(min_item.post_id)
             @min_all_url=@min_all_url['link']
             @min_all=min_item.score
+            @user.lowestUrl=@min_all_url
             @user.lowestScore = @min_all
             #average
             @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
@@ -315,15 +317,62 @@ def create
                         if !sentences[e].text.content.include? "."
                             n=n+1
                         end
-                        users_comments=@post.comments.new(
+                        users_comment=@post.comments.new(
                             username:@username[e],
                             body:sentences[e+n].text.content,
                             score:sentences[e+n].sentiment.score
                             )
                     end
+                    #find min, max and average score
+                    postComments = @post.comments
+                    score=[]
+                    for cm in  postComments
+                        score.push(cm.score)
+                        @all_links.push(cm)
+                    end
+                    aver=score.inject(0.0) { |sum, el| sum + el } / score.length
+                    #get number of comments each post
+                    @post.totalComments = postComments.length
+                    #set value if there have no comment
+                    if @post.totalComments == 0
+                        @post.minScore =0
+                        @post.maxScore = 0
+                        @post.averageScore = 0
+                    else
+                        @post.minScore =score.min
+                        @post.maxScore = score.max
+                        @post.averageScore = aver.round(3)
+                    end
             end
+
                 User.find_each { |c| c.destroy if c.username==user_id}
-                
+                #find min, max and average score of all posts
+                if allUserComments.size != 0
+                    #max
+                    maxScoreComments=allUserComments.max_by{|k| k[:score] }
+                    maxScoreUrl=@user.posts.find_by_id(maxScoreComments.post_id)
+                    maxScoreUrl=maxScoreUrl['link']
+                    @user.highestScore = maxScoreComments.score
+                    #min
+                    mixScoreComments=allUserComments.min_by{|k| k[:score] }
+                    minScoreUrl=@user.posts.find_by_id(minScoreComments.post_id)
+                    minScoreUrl=minScoreUrl['link']
+                    @user.lowestScore = minScoreComments.score
+                    #average
+                    averageAll=allUserComments.inject(0.0) { |sum, el| sum + el.score } / allUserComments.length
+                    averageAll=averageAll.round(3)
+                    @user.averageScore = averageAll
+                    @user.totalComment = allUserComments.length
+                else
+                    #max
+        
+                    @user.highestScore = 0
+                    #min
+                    
+                    @user.lowestScore = 0
+                    #average
+                    @user.averageScore = 0
+                end
                 @users.save
                 @@bot.quit()
                 redirect_to index_path(id: @users.id)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_09_05_112517) do
+ActiveRecord::Schema.define(version: 2018_09_05_123914) do
 
   create_table "comments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "username"
@@ -43,6 +43,8 @@ ActiveRecord::Schema.define(version: 2018_09_05_112517) do
     t.float "highestScore"
     t.float "lowestScore"
     t.integer "totalComment"
+    t.string "highestUrl"
+    t.string "lowestUrl"
   end
 
 end
