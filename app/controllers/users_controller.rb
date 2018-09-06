@@ -17,132 +17,27 @@ class UsersController < ApplicationController
         sort_type = params[:type]
         @user = User.find_by_id(@id)
         @posts= @user.posts     
-        #array of the number of comment in a post
-        @comment_count=[]
-        @all_links=[]
-        #array of min(each post)
-        @min=[]
-        #array of max(each post)
-        @max=[]
-        #array of average(each post)
-        @average=[]
-        #for loop to find max, min ...
-        for i in @posts
-            score=[]
-            @get_comments = i.comments
-            for cm in  @get_comments
-                score.push(cm.score)
-                @all_links.push(cm)
-            end
-            aver=score.inject(0.0) { |sum, el| sum + el } / score.length
-            #get number of comments each post
-            i.totalComments = @get_comments.length
-            #set value if there have no comment
-            if i.totalComments == 0
-                i.minScore =0
-                i.maxScore = 0
-                i.averageScore = 0
-            else
-                i.minScore =score.min
-                i.maxScore = score.max
-                i.averageScore = aver.round(3)
-            end
-            i.save
-            @comment_count.push(@get_comments.length)
-        end 
-        # min, max, average of all comment
-        if @all_links.size != 0
-            #max
-            max_item=@all_links.max_by{|k| k[:score] }
-            @max_all_url=@posts.find_by_id(max_item.post_id)
-            @max_all_url=@max_all_url['link']
-            @max_all=max_item.score
-            @user.highestUrl = @max_all_url
-            @user.highestScore = @max_all
-            #min
-            min_item=@all_links.min_by{|k| k[:score] }
-            @min_all_url=@posts.find_by_id(min_item.post_id)
-            @min_all_url=@min_all_url['link']
-            @min_all=min_item.score
-            @user.lowestUrl=@min_all_url
-            @user.lowestScore = @min_all
-            #average
-            @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
-            @average_all=@average_all.round(3)
-            @user.averageScore = @average_all
-            @user.totalComment = @comment_count.sum
-        else
-            #max
-            @max_all_url=''
-            @max_all=0
-            #min
-            @min_all_url=''
-            @min_all=0
-            #average
-            @average_all=0
-        end
         if (sort_type=="highest")
-            @posts =  @posts.sort_by {|p| p.average_score*-1}
+            @posts =  @posts.sort_by {|p| p.averageScore*-1}
         end
         if (sort_type=="lowest")
-            @posts =  @posts.sort_by {|p| p.average_score}
+            @posts =  @posts.sort_by {|p| p.averageScore}
         end
-        @user.save
     end
     def all_comments
         @id=params[:id]
         @user = User.find_by_id(@id)
         @posts= @user.posts     
-        #array of the number of comment in a post
-        @comment_count=[]
-        @all_links=[]
-        #array of min(each post)
-        @min=[]
-        #array of max(each post)
-        @max=[]
-        #array of average(each post)
-        @average=[]
+        @allUserComments=[]
         #for loop to find max, min ...
         for i in @posts
-            score=[]
-            @get_comments = i.comments
-            for cm in  @get_comments
-                score.push(cm.score)
-                @all_links.push(cm)
+            get_comments = i.comments
+            for cm in  get_comments
+                @allUserComments.push(cm)
             end
-            @min.push(score.min)
-            @max.push(score.max)
-            aver=score.inject(0.0) { |sum, el| sum + el } / score.length
-            @average.push(aver.round(3))
-            @comment_count.push(@get_comments.length)
         end 
-        # min, max, average of all comment
-        if @all_links.size != 0
-            #max
-            max_item=@all_links.max_by{|k| k[:score] }
-            @max_all_url=@posts.find_by_id(max_item.post_id)
-            @max_all_url=@max_all_url['link']
-            @max_all=max_item.score
-            #min
-            min_item=@all_links.min_by{|k| k[:score] }
-            @min_all_url=@posts.find_by_id(min_item.post_id)
-            @min_all_url=@min_all_url['link']
-            @min_all=min_item.score
-            #average
-            @average_all=@all_links.inject(0.0) { |sum, el| sum + el.score } / @all_links.length
-            @average_all=@average_all.round(3)
-        else
-            #max
-            @max_all_url=''
-            @max_all=0
-            #min
-            @min_all_url=''
-            @min_all=0
-            #average
-            @average_all=0
-        end
-        @all_links = @all_links.sort_by{|k| k[:score] }
-        @all_comments=Kaminari.paginate_array(@all_links).page(params[:page]).per(50)
+        @allUserComments = @allUserComments.sort_by{|k| k[:score] }
+        @allComments=Kaminari.paginate_array(@allUserComments).page(params[:page]).per(50)
     end
 
     def show
@@ -182,7 +77,8 @@ def create
     insta_url=params[:insta_url]
     #Get pass
     pass=params[:pass]
-    #remove data of existing account 
+    #all comments
+    allUserComments = []
     if pass=="parastar"
         #run chrome
         options = Selenium::WebDriver::Chrome::Options.new
@@ -198,7 +94,7 @@ def create
             #get account_id
             user_id = @@bot.find_element(:xpath, '/html/body/span/section/main/div/header/section/div[1]/h1').text
             #Save Instagram account
-            @users=User.new(username:  user_id)         
+            @user=User.new(username:  user_id)         
             #close login requirement 
             @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/a').click
             
@@ -231,10 +127,11 @@ def create
                 @@bot.navigate.to "#{post_dom[i][0]}"
                 #save like, image and date
                 date = @@bot.find_element(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[2]/a/time')['title']
-                @post=@users.posts.new(
+                @post=@user.posts.new(
                     link: post_dom[i][0],
                     image: post_dom[i][1],
-                    date: date
+                    date: date,
+                    code: i
                 )
                 #set time to reload, change session
                 start_time= Time.now
@@ -259,8 +156,8 @@ def create
                                 @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
                                 sleep 0.5
                                 #using username and password to login
-                                @@bot.find_element(:id, 'id_username').send_keys 'cuong_manh248'
-                                @@bot.find_element(:id, 'id_password').send_keys '24081991'
+                                @@bot.find_element(:id, 'id_username').send_keys 'minhho402'
+                                @@bot.find_element(:id, 'id_password').send_keys '515173'
                                 @@bot.find_element(:class, 'button-green').click
                                 sleep 0.5
                                 @@bot.navigate.to "#{post_dom[i][0]}"  
@@ -296,6 +193,9 @@ def create
                         comment=d.find_element(:tag_name, 'span').text
                         comment=comment.gsub(/[!().~`,:;<>?|'"{}\\\/\[\]]/,' ')
                         comment=comment.gsub("\n",' ')
+                        if comment[/\b[a-zA-Z0-9\p{Hangul}]+\b/,1].nil?
+                            comment="this is foreign comment"
+                        end
                         if comment.scan(/[a-zA-Z ]/).size==1
                             comment.insert(0,"-")
                         end
@@ -320,7 +220,8 @@ def create
                         users_comment=@post.comments.new(
                             username:@username[e],
                             body:sentences[e+n].text.content,
-                            score:sentences[e+n].sentiment.score
+                            score:sentences[e+n].sentiment.score,
+                            code: i
                             )
                     end
                     #find min, max and average score
@@ -328,7 +229,7 @@ def create
                     score=[]
                     for cm in  postComments
                         score.push(cm.score)
-                        @all_links.push(cm)
+                        allUserComments.push(cm)
                     end
                     aver=score.inject(0.0) { |sum, el| sum + el } / score.length
                     #get number of comments each post
@@ -344,38 +245,37 @@ def create
                         @post.averageScore = aver.round(3)
                     end
             end
-
+                #remove data of existing account 
                 User.find_each { |c| c.destroy if c.username==user_id}
                 #find min, max and average score of all posts
                 if allUserComments.size != 0
                     #max
                     maxScoreComments=allUserComments.max_by{|k| k[:score] }
-                    maxScoreUrl=@user.posts.find_by_id(maxScoreComments.post_id)
-                    maxScoreUrl=maxScoreUrl['link']
+                    maxScoreUrl=@user.posts.find {|p| p.code==maxScoreComments.code}
+                    @user.highestUrl=maxScoreUrl.link
                     @user.highestScore = maxScoreComments.score
                     #min
-                    mixScoreComments=allUserComments.min_by{|k| k[:score] }
-                    minScoreUrl=@user.posts.find_by_id(minScoreComments.post_id)
-                    minScoreUrl=minScoreUrl['link']
+                    minScoreComments=allUserComments.min_by{|k| k[:score] }
+                    minScoreUrl=@user.posts.find {|p| p.code==minScoreComments.code}
+                    @user.lowestUrl =minScoreUrl.link
                     @user.lowestScore = minScoreComments.score
                     #average
                     averageAll=allUserComments.inject(0.0) { |sum, el| sum + el.score } / allUserComments.length
-                    averageAll=averageAll.round(3)
-                    @user.averageScore = averageAll
+                    @user.averageScore = averageAll.round(3)
                     @user.totalComment = allUserComments.length
                 else
                     #max
-        
+                    @user.highestUrl= ''
                     @user.highestScore = 0
                     #min
-                    
+                    @user.lowestUrl = ''
                     @user.lowestScore = 0
                     #average
                     @user.averageScore = 0
                 end
-                @users.save
+                @user.save
                 @@bot.quit()
-                redirect_to index_path(id: @users.id)
+                redirect_to index_path(id: @user.id)
         else
             flash[:danger] = "Please enter the valid username!"
             @@bot.quit()

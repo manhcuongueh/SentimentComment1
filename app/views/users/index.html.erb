@@ -21,27 +21,27 @@
         </tr>
         <tr>
           <td><h5>Total of Comments:</h5><td>
-          <td><h5><%=@comment_count.sum%></h5><td>
+          <td><h5><%=@user.totalComment%></h5><td>
         </tr>
         <tr>
           <td><h5>Average Score:</h5><td>
-          <td><h5><%=@average_all%></h5><td>
+          <td><h5><%=@user.averageScore%></h5><td>
         </tr>
          <tr>
           <td><h5>Highest Score:</h5><td>
-          <td><h5><%=@max_all%></h5><td>
+          <td><h5><%=@user.highestScore%></h5><td>
         </tr>
         <tr>
           <td><h5>URL:</h5><td>
-          <td><a href="<%=@max_all_url%>"><h5><%=@max_all_url%></h5></a><td>
+          <td><a href="<%=@user.highestUrl%>"><h5><%=@user.highestUrl%></h5></a><td>
         </tr>
          <tr>
           <td><h5>Lowest Score:</h5><td>
-          <td><h5><%=@min_all%></h5><td>
+          <td><h5><%=@user.lowestScore%></h5><td>
         </tr>
         <tr>
           <td><h5>URL:</h5><td>
-          <td><a href="<%=@max_all_url%>"><h5><%=@min_all_url%></h5></a><td>
+          <td><a href="<%=@user.lowestUrl%>"><h5><%=@user.lowestUrl%></h5></a><td>
         </tr>
       </table>
     </div>
