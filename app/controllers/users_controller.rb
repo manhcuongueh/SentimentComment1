@@ -9,7 +9,6 @@ class UsersController < ApplicationController
         end
         # paging area
         @users=Kaminari.paginate_array(@users_all).page(params[:page]).per(10)
-        
     end
 
     def index    
@@ -26,16 +25,9 @@ class UsersController < ApplicationController
     end
     def all_comments
         @id=params[:id]
-        @user = User.find_by_id(@id)
-        @posts= @user.posts     
-        @allUserComments=[]
-        #for loop to find max, min ...
-        for i in @posts
-            get_comments = i.comments
-            for cm in  get_comments
-                @allUserComments.push(cm)
-            end
-        end 
+        @user = User.find_by_id(@id) 
+        @posts = @user.posts
+        @allUserComments = @user.comments   
         @allUserComments = @allUserComments.sort_by{|k| k[:score] }
         @allComments=Kaminari.paginate_array(@allUserComments).page(params[:page]).per(50)
     end
@@ -187,14 +179,14 @@ def create
                     dom_comment=@@bot.find_elements(:xpath, '/html/body/span/section/main/div/div/article/div[2]/div[1]/ul/li')
                     dom_comment.shift
                     #for solving unsupported languages
-                    text = "Google, headquartered in Mountain View."
+                    text = "아니요오 내일은 파이톤 제품은 할인이 없어요."
                     @username = []
                     for d in dom_comment
                         comment=d.find_element(:tag_name, 'span').text
                         comment=comment.gsub(/[!().~`,:;<>?|'"{}\\\/\[\]]/,' ')
                         comment=comment.gsub("\n",' ')
-                        if comment[/\b[a-zA-Z0-9\p{Hangul}]+\b/,1].nil?
-                            comment="this is foreign comment"
+                        if comment[/\b[a-zA-Z0-9\p{Hangul}]+\b/].nil?
+                            comment=comment[0..29]
                         end
                         if comment.scan(/[a-zA-Z ]/).size==1
                             comment.insert(0,"-")
