@@ -1,11 +1,29 @@
 class UsersController < ApplicationController
     def new
         @users_all = User.all
-        @users_all=@users_all.sort_by {|u| u.averageScore*-1}
         #search
         username = params[:username]
         if !username.nil?
         @users_all = @users_all.find_all{|w| w.username.include?(username)}
+        end
+        #sort search result
+         url =  request.fullpath
+         if url.include?('username')
+             @urlNormal = "?utf8=✓&username=#{username}&commit=Search"
+             @urlHighest ="?utf8=✓&username=#{username}&commit=Search&type=highest"
+             @urlLowest = "?utf8=✓&username=#{username}&commit=Search&type=lowest"
+         else
+             @urlNormal = "/"
+             @urlHighest = '?type=highest'
+             @urlLowest =  '?type=lowest'
+         end
+        #sort with drop down Average Score
+        sort_type = params[:type]
+        if (sort_type=="highest")
+            @users_all=@users_all.sort_by {|u| u.averageScore*-1}
+        end
+        if (sort_type=="lowest")
+            @users_all=@users_all.sort_by {|u| u.averageScore}
         end
         # paging area
         @users=Kaminari.paginate_array(@users_all).page(params[:page]).per(10)
@@ -148,8 +166,8 @@ def create
                                 @@bot.navigate.to "https://www.instagram.com/accounts/login/?force_classic_login"
                                 sleep 0.5
                                 #using username and password to login
-                                @@bot.find_element(:id, 'id_username').send_keys 'minhho402'
-                                @@bot.find_element(:id, 'id_password').send_keys '515173'
+                                @@bot.find_element(:id, 'id_username').send_keys 'cuong_manh248'
+                                @@bot.find_element(:id, 'id_password').send_keys '24081991'
                                 @@bot.find_element(:class, 'button-green').click
                                 sleep 0.5
                                 @@bot.navigate.to "#{post_dom[i][0]}"  

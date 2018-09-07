@@ -46,7 +46,16 @@
       <thead>
         <th>Number</th>
         <th>Username</th>
-        <th>Average Score</th>
+        <th><div class="dropdown show">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownMenuButton" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Average Score
+            </a>
+            <div class="dropdown-menu"  aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="<%= @urlNormal%>">Normal</a>
+              <a class="dropdown-item" href="<%= @urlHighest%>">Highest Average</a>
+              <a class="dropdown-item" href="<%= @urlLowest%>">Lowest Average</a>
+            </div>
+          </div></th>
         <th>Date Start</th>
         <th>Date End</th>
       </thead>
