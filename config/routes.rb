@@ -9,7 +9,5 @@ Rails.application.routes.draw do
   get  'download' =>  'users#download'
   get  'comments' =>  'comments#comments'
   get  'top-fans' => 'comments#topComments'
-  get  'highest-score-users' => 'comments#highestScore'
-  get  'lowest-score-users' => 'comments#lowestScore'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
