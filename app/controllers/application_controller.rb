@@ -7,9 +7,15 @@ class ApplicationController < ActionController::Base
         @name=''
       else
         @link_index="index?id=#{@id}"
+        #all posts
         @link_index_sort_highest = "index?id=#{@id}&type=highest"
         @link_index_sort_lowest = "index?id=#{@id}&type=lowest"
+        #all comments
         @link_comment="comments?id=#{@id}"
+        #top
+        @link_top="top-fans?id=#{@id}"
+        @link_score="top-fans?id=#{@id}&type=highest"
+        @link_negative="top-fans?id=#{@id}&type=lowest"
       end
 
     end

@@ -41,14 +41,6 @@ class UsersController < ApplicationController
             @posts =  @posts.sort_by {|p| p.averageScore}
         end
     end
-    def all_comments
-        @id=params[:id]
-        @user = User.find_by_id(@id) 
-        @posts = @user.posts
-        @allUserComments = @user.comments   
-        @allUserComments = @allUserComments.sort_by{|k| k[:score] }
-        @allComments=Kaminari.paginate_array(@allUserComments).page(params[:page]).per(50)
-    end
 
     def show
        #get param
