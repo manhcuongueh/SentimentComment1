@@ -70,6 +70,7 @@
           <th>Username</th>
           <th>Comments</th>
           <th>Score</th>
+          <th>Post Date</th>
           <th>Link</th>
           <th>Image</th>
         </thead>
@@ -80,6 +81,7 @@
             <td><b><%=cm.username %></b></td>
             <td><%=cm.body%></td>
             <td><%=cm.score%></td>
+            <td width = "10%"><%=@posts.find_by_id(cm.post_id)['date']%></td>
             <td><%=link_to "#{@posts.find_by_id(cm.post_id)['link']}", @posts.find_by_id(cm.post_id)['link']%></td>
             <td><%=link_to image_tag(@posts.find_by_id(cm.post_id)['image'], height: '100', width: '100'), @posts.find_by_id(cm.post_id)['image'] %></td>
           </tr>  

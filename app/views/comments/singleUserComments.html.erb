@@ -17,6 +17,7 @@
               <a class="dropdown-item" href="comments?id=<%=@id%>&name=<%=@username%>&type=lowest">Lowest Average</a>
             </div>
           </div></th>
+          <th>Post Date</th>
           <th>Link</th>
           <th>Image</th>
         </thead>
@@ -26,6 +27,7 @@
             <td><%=@comments.index(cm)+1%></td>
             <td><%=cm.body%></td>
             <td><%=cm.score%></td>
+            <td><%=@posts.find_by_id(cm.post_id)['date']%></td>
             <td><%=link_to "#{@posts.find_by_id(cm.post_id)['link']}", @posts.find_by_id(cm.post_id)['link']%></td>
             <td><%=link_to image_tag(@posts.find_by_id(cm.post_id)['image'], height: '100', width: '100'), @posts.find_by_id(cm.post_id)['image'] %></td>
           </tr>  
