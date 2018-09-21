@@ -40,5 +40,12 @@ class CommentsController < ApplicationController
             @top_list = @top_list.first(50)
         end
     end
+    def singleUserComments
+        id=params[:id]
+        @username = params[:name]
+        @user = User.find_by_id(id) 
+        @posts = @user.posts
+        @Comments = @user.comments.where('username=?', @username)
+    end
 
 end

@@ -60,7 +60,7 @@
          <% @top_list.each do |cm|%>
           <tr>
             <td><%=@top_list.index(cm)+1%></td>
-            <td><b><%=cm[:username] %></b></td>
+            <td><b><%=link_to "#{cm[:username]}", top_fans_comments_path(id: @id, name: cm[:username]) %></b></td>
             <td><%=cm[:comment_times]%></td>
             <td><%=cm[:totalScore].round(3)%></td>
             <td><%=cm[:score].round(3)%></td>
