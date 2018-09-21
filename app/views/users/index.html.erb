@@ -57,6 +57,7 @@
         <thead>
           <th>No</th>
           <th>Image</th>
+          <th>Post Date</th>
           <th>Link</th>
           <th>Comments</th>
           <th>Lowest</th>
@@ -69,6 +70,7 @@
           <tr>
             <td><%=i+1%></td>
             <td><%=link_to image_tag(post.image, height: '100', width: '100'), post.image %></td>
+            <td><%= post.date%></td>
             <td><%=link_to "#{post.link}", post.link%></td>
             <td><%= post.totalComments%></td>
             <td><%= post.minScore%></td>
