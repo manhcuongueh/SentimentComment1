@@ -41,11 +41,19 @@ class CommentsController < ApplicationController
         end
     end
     def singleUserComments
-        id=params[:id]
+        @id=params[:id]
         @username = params[:name]
-        @user = User.find_by_id(id) 
+        @user = User.find_by_id(@id) 
         @posts = @user.posts
-        @Comments = @user.comments.where('username=?', @username)
+        @comments = @user.comments.where('username=?', @username)
+        #sort with drop down Average Score
+        sort_type = params[:type]
+        if (sort_type=="highest")
+            @comments=@comments.sort_by {|u| u.score*-1}
+        end
+        if (sort_type=="lowest")
+            @comments=@comments.sort_by {|u| u.score}
+        end
     end
 
 end
