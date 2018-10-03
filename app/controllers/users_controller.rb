@@ -98,7 +98,7 @@ def create
             #Save Instagram account
             @user=User.new(username:  user_id)         
             #close login requirement 
-            @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/a').click
+            @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/button').click
             
             #scroll down the account page and save dom
             for i in 0..8
@@ -176,7 +176,7 @@ def create
                                 @@bot.manage.window.maximize
                                 @@bot.navigate.to "#{post_dom[i][0]}"
                                 sleep 0.5
-                                @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/a').click
+                                @@bot.find_element(:xpath, '/html/body/span/section/nav/div[2]/div/div/div[3]/div/div/section/div/button').click
                                 k=0
                                 start_time= Time.now
                             end
